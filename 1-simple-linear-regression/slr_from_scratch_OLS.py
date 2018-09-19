@@ -1,22 +1,21 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.metrics import mean_squared_error
 
-# Reading Data
-data = pd.read_csv('RealEstate.csv')
-# print(data.head())
+# Data preprocessing
+data = pd.read_csv("RealEstate.csv")
 
-# Collecting X and Y
+# Converting Pandas dataframe to numpy array
 X = data.Size.values
 Y = data.Price.values
 
-# Calculating coefficient
 # Mean X and Y
 mean_x = np.mean(X)
 mean_y = np.mean(Y)
 
-# Total number of values
-m = len(X)
+m = X.shape[0]  #  number of samples
+
 
 # Using the OLS (Ordinary Least Squares)
 # formula to calculate theta0 and theta1
@@ -32,22 +31,16 @@ theta0 = mean_y - (theta1 * mean_x)
 print(f"Coefficients theta0 = {theta0}, theta1 = {theta1} ")
 
 
-# Prediction and
-def predict(theta0, theta1, X):
-    return theta0 + theta1 * X
-
-
 # Predicted Values
-Y_pred = predict(theta0, theta1, X)
+Y_pred = theta0 + theta1 * X
+
 
 # Model Evaluation
-# Calculating Root Mean Squares Error
-rmse = 0
-for i in range(m):
-    y_pred = theta0 + theta1 * X[i]
-    rmse += (Y[i] - y_pred) ** 2
-rmse = np.sqrt(rmse/m)
-print("RMSE = ", rmse)
+mse = mean_squared_error(Y, Y_pred)
+rmse = np.sqrt(mse)
+
+print("MSE Score = ", mse)
+print("RMSE Score = ", rmse)
 
 # Calculating R2 Score
 ss_tot = 0
@@ -62,10 +55,9 @@ print("R2 Score = ", r2)
 
 # Visualization
 # Ploting Line
-plt.plot(X, Y_pred, color='#58b970', label='Regression Line')
+plt.plot(X, Y_pred, color='#c93e4e', label='Regression Line')
 # Ploting Scatter Points
-plt.scatter(X, Y, c='#ef5423', label='Scatter Plot')
-
+plt.scatter(X, Y, c='#54a774', label='Scatter Plot')
 plt.xlabel('Size')
 plt.ylabel('Price')
 plt.legend()
