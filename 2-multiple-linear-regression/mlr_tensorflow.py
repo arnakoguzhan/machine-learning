@@ -18,7 +18,7 @@ Y_train = sc.fit_transform(Y_train)
 
 # Parameters
 alpha = 0.01  # learning rate
-iteration = 1000  #  iteration
+iterations = 1000  #  iteration
 m, n = X_train.shape  # sample count in training data
 
 # bias_vector to add to X
@@ -32,13 +32,13 @@ Y = tf.placeholder(tf.float64, name='Y')
 # initial Theta variables
 theta = tf.Variable(np.random.normal(size=n+1), name="theta")
 
-# Prediction formula
+# Hypothesis
 pred = tf.multiply(X, theta)
 
-# Mean squared error and Gradient descent optimizer
+# Cost Function
 cost = tf.reduce_sum(tf.pow(pred-Y, 2))/(2*m)
 
-# Minimize minimizes W and b because Variable objects are trainable=True by default
+# Gradient Descent Algorithm
 optimizer = tf.train.GradientDescentOptimizer(alpha).minimize(cost)
 
 # Initializing the variables and creating session
@@ -48,20 +48,24 @@ sess.run(init)
 
 # Batch Gradient Descent
 # feed data to algorithm
-for epoch in range(iteration):
+for iter in range(iterations):
     for (x, y) in zip(X_train, Y_train):
         sess.run(optimizer, feed_dict={X: x, Y: y})
 
 # Printing coefficients
 print(f"Coefficients theta = {sess.run(theta)}")
 
-# Predicted Values for plotting
+# Predicted Values
 Y_pred = X_train.dot(sess.run(theta))
-m = Y_pred.shape[0]
-Y_pred = np.reshape(Y_pred, (m, 1))
+Y_pred = Y_pred.reshape(-1, 1)
 
 
 # Model Evaluation
+def rmse(Y, Y_pred):
+    rmse = np.sqrt(sum((Y - Y_pred) ** 2) / Y.shape[0])
+    return rmse
+
+
 def r2_score(Y, Y_pred):
     mean_y = np.mean(Y)
     ss_tot = sum((Y - mean_y) ** 2)
@@ -70,8 +74,8 @@ def r2_score(Y, Y_pred):
     return r2
 
 
-mse = sess.run(cost, feed_dict={X: X_train, Y: Y_train})
-print("MSE = ", mse)
+# Print Scores
+print("RMSE = ", rmse(Y_train, Y_pred))
 print("R2 Score = ", r2_score(Y_train, Y_pred))
 
 # Close TF session
