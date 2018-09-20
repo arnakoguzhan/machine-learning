@@ -8,12 +8,8 @@ from sklearn.preprocessing import StandardScaler
 data = pd.read_csv("RealEstate.csv")
 
 # Converting Pandas dataframe to numpy array
-X_train = data.Size.values
-Y_train = data.Price.values
-
-# Reshaping
-X_train = np.reshape(X_train, (len(X_train), 1))
-Y_train = np.reshape(Y_train, (len(Y_train), 1))
+X_train = data.Size.values.reshape(-1, 1)
+Y_train = data.Price.values.reshape(-1, 1)
 
 # Feature scaling so that Gradient Descent works well
 sc = StandardScaler()
@@ -22,7 +18,7 @@ Y_train = sc.fit_transform(Y_train)
 
 # Parameters
 alpha = 0.01  # learning rate
-iteration = 1000  #  iteration
+iterations = 1000  #  number of iteration
 m = X_train.shape[0]  # sample count in training data
 
 # TF Placeholders
@@ -33,13 +29,13 @@ Y = tf.placeholder(tf.float32, name='Y')
 theta0 = tf.Variable(np.random.normal(), name="theta0")
 theta1 = tf.Variable(np.random.normal(), name="theta1")
 
-# Prediction formula
-pred = tf.add(tf.multiply(X, theta1), theta0)
+# Hypothesis
+hypothesis = tf.add(tf.multiply(X, theta1), theta0)
 
-# Mean squared error and Gradient descent optimizer
-cost = tf.reduce_sum(tf.pow(pred-Y, 2))/(2*m)
+# Cost Function
+cost = tf.reduce_sum(tf.pow(hypothesis-Y, 2))/(2*m)
 
-# Minimize minimizes W and b because Variable objects are trainable=True by default
+# Gradient Descent Algorithm
 optimizer = tf.train.GradientDescentOptimizer(alpha).minimize(cost)
 
 # Initializing the variables and creating session
@@ -49,20 +45,42 @@ sess.run(init)
 
 # Batch Gradient Descent
 # feed data to algorithm
-for epoch in range(iteration):
+for iter in range(iterations):
     for (x, y) in zip(X_train, Y_train):
         sess.run(optimizer, feed_dict={X: x, Y: y})
 
+
 # Printing coefficients
 print(f"Coefficients theta0 = {sess.run(theta0)}, theta1 = {sess.run(theta1)}")
+
 
 # Predicted Values for plotting
 Y_pred = sess.run(theta0) + sess.run(theta1) * X_train
 
 
 # Model Evaluation
-mse = sess.run(cost, feed_dict={X: X_train, Y: Y_train})
-print("MSE = ", mse)
+def rmse(Y, Y_pred):
+    rmse = np.sqrt(sum((Y - Y_pred) ** 2) / Y.shape[0])
+    return rmse
+
+
+def r2_score(Y, Y_pred):
+    mean_y = np.mean(Y)
+    ss_tot = sum((Y - mean_y) ** 2)
+    ss_res = sum((Y - Y_pred) ** 2)
+    r2 = 1 - (ss_res / ss_tot)
+    return r2
+
+
+# Print Scores
+print("RMSE = ", rmse(Y_train, Y_pred))
+print("R2 Score = ", r2_score(Y_train, Y_pred))
+
+
+# Reverse Feature Scaling so that graph will result in real values
+X_train = sc.inverse_transform(X_train)
+Y_train = sc.inverse_transform(Y_train)
+Y_pred = sc.inverse_transform(Y_pred)
 
 
 # Visualization

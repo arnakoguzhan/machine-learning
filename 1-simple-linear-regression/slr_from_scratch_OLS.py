@@ -36,25 +36,26 @@ Y_pred = theta0 + theta1 * X
 
 
 # Model Evaluation
-mse = mean_squared_error(Y, Y_pred)
-rmse = np.sqrt(mse)
+def rmse(Y, Y_pred):
+    rmse = np.sqrt(sum((Y - Y_pred) ** 2) / Y.shape[0])
+    return rmse
 
-print("MSE Score = ", mse)
-print("RMSE Score = ", rmse)
 
-# Calculating R2 Score
-ss_tot = 0
-ss_res = 0
-for i in range(m):
-    y_pred = theta0 + theta1 * X[i]
-    ss_tot += (Y[i] - mean_y) ** 2
-    ss_res += (Y[i] - y_pred) ** 2
-r2 = 1 - (ss_res/ss_tot)
-print("R2 Score = ", r2)
+def r2_score(Y, Y_pred):
+    mean_y = np.mean(Y)
+    ss_tot = sum((Y - mean_y) ** 2)
+    ss_res = sum((Y - Y_pred) ** 2)
+    r2 = 1 - (ss_res / ss_tot)
+    return r2
+
+
+# Print Scores
+print("RMSE = ", rmse(Y, Y_pred))
+print("R2 Score = ", r2_score(Y, Y_pred))
 
 
 # Visualization
-# Ploting Line
+# Ploting Regression Line
 plt.plot(X, Y_pred, color='#c93e4e', label='Regression Line')
 # Ploting Scatter Points
 plt.scatter(X, Y, c='#54a774', label='Scatter Plot')
